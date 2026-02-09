@@ -1,0 +1,84 @@
+# Model Architecture Configuration
+model:
+  # Base architecture (llama-3-derivative or moe)
+  architecture_type: "llama-3-moe"
+  base_model: "meta-llama/Meta-Llama-3-8B"
+  
+  # Model dimensions
+  hidden_size: 4096
+  intermediate_size: 14336
+  num_hidden_layers: 32
+  num_attention_heads: 32
+  num_key_value_heads: 8  # GQA: reduced KV heads
+  
+  # Context and vocabulary
+  max_position_embeddings: 131072  # 128k context
+  vocab_size: 128256
+  rope_theta: 500000.0  # Extended RoPE for long context
+  
+  # Mixture of Experts (MoE)
+  moe:
+    enabled: true
+    num_experts: 8
+    num_experts_per_token: 2
+    expert_capacity: 1.25
+    router_aux_loss_coef: 0.01
+    router_z_loss_coef: 0.001
+  
+  # Attention configuration
+  attention:
+    type: "grouped_query"  # GQA
+    use_flash_attention: true
+    attention_dropout: 0.0
+    use_sliding_window: false
+    sliding_window_size: 4096
+  
+  # RoPE configuration
+  rope:
+    type: "rotary"
+    scaling_factor: 8.0  # For extended context
+    original_max_position_embeddings: 8192
+  
+  # Normalization
+  rms_norm_eps: 1.0e-5
+  use_cache: true
+  tie_word_embeddings: false
+  
+  # Dropout
+  hidden_dropout: 0.0
+  attention_dropout: 0.0
+  
+  # Initialization
+  initializer_range: 0.02
+
+# Quantization settings
+quantization:
+  enabled: true
+  method: "qlora"  # QLoRA for 4-bit
+  load_in_4bit: true
+  bnb_4bit_compute_dtype: "bfloat16"
+  bnb_4bit_quant_type: "nf4"
+  bnb_4bit_use_double_quant: true
+  
+# LoRA/QLoRA Configuration
+lora:
+  r: 64
+  lora_alpha: 16
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+  lora_dropout: 0.05
+  bias: "none"
+  task_type: "CAUSAL_LM"
+  
+# Memory optimization
+memory:
+  gradient_checkpointing: true
+  use_reentrant: false
+  cpu_offload: false
+  disk_offload: false

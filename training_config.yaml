@@ -1,0 +1,89 @@
+# Training Configuration
+training:
+  # Output directories
+  output_dir: "./models/checkpoints"
+  logging_dir: "./logs"
+  
+  # Training hyperparameters
+  num_train_epochs: 3
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  gradient_accumulation_steps: 16
+  learning_rate: 2.0e-4
+  weight_decay: 0.01
+  warmup_ratio: 0.03
+  max_grad_norm: 1.0
+  
+  # Optimizer
+  optimizer: "paged_adamw_8bit"  # Memory-efficient optimizer
+  lr_scheduler_type: "cosine"
+  
+  # Mixed precision
+  fp16: false
+  bf16: true
+  tf32: true
+  
+  # Evaluation
+  evaluation_strategy: "steps"
+  eval_steps: 100
+  save_strategy: "steps"
+  save_steps: 500
+  save_total_limit: 3
+  load_best_model_at_end: true
+  metric_for_best_model: "eval_loss"
+  
+  # Logging
+  logging_steps: 10
+  report_to: ["tensorboard", "wandb"]
+  
+  # Data
+  max_seq_length: 8192  # Adjust based on memory
+  packing: true  # Pack multiple samples
+  dataset_text_field: "text"
+  
+# Unsloth/Axolotl Configuration
+acceleration:
+  framework: "unsloth"  # or "axolotl"
+  
+  unsloth:
+    use_unsloth: true
+    max_seq_length: 8192
+    load_in_4bit: true
+    
+  axolotl:
+    use_axolotl: false
+    sequence_len: 8192
+    
+# Data loading
+data:
+  train_file: "data/processed/train.jsonl"
+  validation_file: "data/processed/validation.jsonl"
+  test_file: "data/processed/test.jsonl"
+  
+  # Preprocessing
+  num_workers: 8
+  preprocessing_num_workers: 8
+  
+  # Train/val split
+  train_split: 0.95
+  validation_split: 0.05
+  seed: 42
+
+# Checkpointing
+checkpoint:
+  resume_from_checkpoint: null
+  save_safetensors: true
+  
+# W&B Configuration
+wandb:
+  project: "custom-llm-training"
+  entity: null
+  name: null
+  tags: ["llama-3", "moe", "qlora"]
+  
+# Distributed Training
+distributed:
+  # DeepSpeed configuration
+  deepspeed: null  # Path to DeepSpeed config if using
+  fsdp: ""
+  fsdp_config: null
